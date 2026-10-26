@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Explorer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header id="page-header">
+        <h1>Course Explorer</h1>
+    </header>
+
+    <section id="upload-section">
+        <label for="file-input">Load courses (JSON):</label>
+        <input type="file" id="file-input" accept=".json,application/json">
+        <p id="error-message" class="error-message" role="alert"></p>
+    </section>
+
+    <section id="controls-section">
+        <div id="filter-bar" class="control-bar">
+            <label for="department-filter">Department:</label>
+            <select id="department-filter">
+                <option value="all">All</option>
+            </select>
+
+            <label for="level-filter">Level:</label>
+            <select id="level-filter">
+                <option value="all">All</option>
+            </select>
+
+            <label for="credits-filter">Credits:</label>
+            <select id="credits-filter">
+                <option value="all">All</option>
+            </select>
+
+            <label for="instructor-filter">Instructor:</label>
+            <select id="instructor-filter">
+                <option value="all">All</option>
+            </select>
+        </div>
+
+        <div id="sort-bar" class="control-bar">
+            <label for="sort-select">Sort by:</label>
+            <select id="sort-select">
+                <option value="none">None</option>
+                <option value="id-asc">ID (A-Z)</option>
+                <option value="id-desc">ID (Z-A)</option>
+                <option value="title-asc">Title (A-Z)</option>
+                <option value="title-desc">Title (Z-A)</option>
+                <option value="semester-asc">Semester (Earliest)</option>
+                <option value="semester-desc">Semester (Latest)</option>
+            </select>
+        </div>
+    </section>
+
+    <main id="main-content">
+        <section id="course-list-section">
+            <h2>Courses</h2>
+            <ul id="course-list"></ul>
+        </section>
+
+        <section id="course-details-section">
+            <h2>Course Details</h2>
+            <div id="course-details">
+                <p class="placeholder-text">Select a course to see its details.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="course.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
