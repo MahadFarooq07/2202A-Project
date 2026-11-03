@@ -64,4 +64,47 @@ class Course {
     get semester() {
         return this._semester;
     }
+
+    static formatNumber(value) {
+        return value === null ? MISSING_TEXT : String(value);
+    }
+
+    getDisplayLabel() {
+        return this._id;
+    }
+
+    getDetailFields() {
+        return [
+            { label: "Title", value: this._title },
+            { label: "Department", value: this._department },
+            { label: "Level", value: Course.formatNumber(this._level) },
+            { label: "Credits", value: Course.formatNumber(this._credits) },
+            { label: "Instructor", value: this._instructor },
+            { label: "Semester", value: this._semester }
+        ];
+    }
+
+    createDetailsElement() {
+        const container = document.createElement("div");
+
+        const heading = document.createElement("h3");
+        heading.textContent = this._id;
+        container.appendChild(heading);
+
+        this.getDetailFields().forEach((field) => {
+            const row = document.createElement("p");
+            const label = document.createElement("strong");
+            label.textContent = `${field.label}: `;
+            row.appendChild(label);
+            row.appendChild(document.createTextNode(field.value));
+            container.appendChild(row);
+        });
+
+        const description = document.createElement("p");
+        description.className = "course-description";
+        description.textContent = this._description;
+        container.appendChild(description);
+
+        return container;
+    }
 }
