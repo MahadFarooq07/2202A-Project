@@ -1,8 +1,10 @@
 const fileInput = document.getElementById("file-input");
 const errorMessage = document.getElementById("error-message");
 const courseList = document.getElementById("course-list");
+const courseDetails = document.getElementById("course-details");
 
 let allCourses = [];
+let selectedCourse = null;
 
 function showError(message) {
     errorMessage.textContent = message;
@@ -45,6 +47,25 @@ function parseCourses(fileText) {
     };
 }
 
+function showPlaceholderDetails() {
+    courseDetails.innerHTML = "";
+    const placeholder = document.createElement("p");
+    placeholder.className = "placeholder-text";
+    placeholder.textContent = "Select a course to see its details.";
+    courseDetails.appendChild(placeholder);
+}
+
+function selectCourse(course, listItem) {
+    selectedCourse = course;
+    courseDetails.innerHTML = "";
+    courseDetails.appendChild(course.createDetailsElement());
+
+    // only one item highlighted at a time
+    courseList.querySelectorAll(".course-item.selected")
+        .forEach((item) => item.classList.remove("selected"));
+    listItem.classList.add("selected");
+}
+
 function renderCourseList(courses) {
     courseList.innerHTML = "";
 
@@ -52,6 +73,10 @@ function renderCourseList(courses) {
         const listItem = document.createElement("li");
         listItem.className = "course-item";
         listItem.textContent = course.getDisplayLabel();
+        if (course === selectedCourse) {
+            listItem.classList.add("selected");
+        }
+        listItem.addEventListener("click", () => selectCourse(course, listItem));
         courseList.appendChild(listItem);
     });
 }
@@ -60,6 +85,8 @@ function handleFileText(fileText) {
     try {
         const { courses, skippedCount } = parseCourses(fileText);
         allCourses = courses;
+        selectedCourse = null;
+        showPlaceholderDetails();
         renderCourseList(allCourses);
 
         if (skippedCount > 0) {
@@ -69,6 +96,8 @@ function handleFileText(fileText) {
         }
     } catch (loadError) {
         allCourses = [];
+        selectedCourse = null;
+        showPlaceholderDetails();
         renderCourseList(allCourses);
         showError(`Couldn't load courses: ${loadError.message}`);
     }
