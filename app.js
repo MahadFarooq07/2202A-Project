@@ -3,6 +3,14 @@ const errorMessage = document.getElementById("error-message");
 const courseList = document.getElementById("course-list");
 const courseDetails = document.getElementById("course-details");
 
+// each filter dropdown + the course field it reads
+const filterConfigs = [
+    { select: document.getElementById("department-filter"), field: "department", isNumeric: false },
+    { select: document.getElementById("level-filter"), field: "level", isNumeric: true },
+    { select: document.getElementById("credits-filter"), field: "credits", isNumeric: true },
+    { select: document.getElementById("instructor-filter"), field: "instructor", isNumeric: false }
+];
+
 let allCourses = [];
 let selectedCourse = null;
 
@@ -81,12 +89,37 @@ function renderCourseList(courses) {
     });
 }
 
+function getUniqueValues(courses, field, isNumeric) {
+    const values = courses
+        .map((course) => course[field])
+        .filter((value) => value !== null && value !== MISSING_TEXT);
+
+    const uniqueValues = [...new Set(values)];
+    return isNumeric
+        ? uniqueValues.sort((a, b) => a - b)
+        : uniqueValues.sort((a, b) => a.localeCompare(b));
+}
+
+function populateFilter(config, courses) {
+    config.select.innerHTML = "";
+    config.select.appendChild(new Option("All", "all"));
+
+    getUniqueValues(courses, config.field, config.isNumeric).forEach((value) => {
+        config.select.appendChild(new Option(String(value), String(value)));
+    });
+}
+
+function populateAllFilters(courses) {
+    filterConfigs.forEach((config) => populateFilter(config, courses));
+}
+
 function handleFileText(fileText) {
     try {
         const { courses, skippedCount } = parseCourses(fileText);
         allCourses = courses;
         selectedCourse = null;
         showPlaceholderDetails();
+        populateAllFilters(allCourses);
         renderCourseList(allCourses);
 
         if (skippedCount > 0) {
@@ -98,6 +131,7 @@ function handleFileText(fileText) {
         allCourses = [];
         selectedCourse = null;
         showPlaceholderDetails();
+        populateAllFilters(allCourses);
         renderCourseList(allCourses);
         showError(`Couldn't load courses: ${loadError.message}`);
     }
