@@ -2,6 +2,7 @@ const fileInput = document.getElementById("file-input");
 const errorMessage = document.getElementById("error-message");
 const courseList = document.getElementById("course-list");
 const courseDetails = document.getElementById("course-details");
+const sortSelect = document.getElementById("sort-select");
 
 // each filter dropdown + the course field it reads
 const filterConfigs = [
@@ -121,9 +122,41 @@ function getActiveFilters() {
     return filters;
 }
 
+// missing values always go last, no matter the direction
+function compareWithMissingLast(a, b, isMissing, compare, direction) {
+    if (isMissing(a) && isMissing(b)) return 0;
+    if (isMissing(a)) return 1;
+    if (isMissing(b)) return -1;
+    return compare(a, b) * direction;
+}
+
+function sortCourses(courses, sortValue) {
+    if (sortValue === "none") {
+        return courses;
+    }
+
+    const [field, order] = sortValue.split("-");
+    const direction = order === "desc" ? -1 : 1;
+
+    if (field === "semester") {
+        return [...courses].sort((a, b) => compareWithMissingLast(
+            a.getSemesterSortKey(), b.getSemesterSortKey(),
+            (key) => key === null, (x, y) => x - y, direction
+        ));
+    }
+
+    return [...courses].sort((a, b) => compareWithMissingLast(
+        a[field], b[field],
+        (text) => text === MISSING_TEXT,
+        (x, y) => x.localeCompare(y, undefined, { numeric: true }),
+        direction
+    ));
+}
+
 function updateCourseList() {
     const filters = getActiveFilters();
-    const visibleCourses = allCourses.filter((course) => course.matchesFilters(filters));
+    const filteredCourses = allCourses.filter((course) => course.matchesFilters(filters));
+    const visibleCourses = sortCourses(filteredCourses, sortSelect.value);
     renderCourseList(visibleCourses);
 
     if (allCourses.length > 0 && visibleCourses.length === 0) {
@@ -177,3 +210,4 @@ function handleFileSelect(event) {
 
 fileInput.addEventListener("change", handleFileSelect);
 filterConfigs.forEach((config) => config.select.addEventListener("change", updateCourseList));
+sortSelect.addEventListener("change", updateCourseList);

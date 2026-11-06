@@ -1,4 +1,5 @@
 const MISSING_TEXT = "Not specified";
+const TERM_ORDER = ["winter", "spring", "summer", "fall"];
 
 class Course {
     constructor(courseData) {
@@ -67,6 +68,15 @@ class Course {
 
     static formatNumber(value) {
         return value === null ? MISSING_TEXT : String(value);
+    }
+
+    // "Fall 2025" -> 2025 * 4 + 3, so later terms get bigger numbers
+    getSemesterSortKey() {
+        const match = this._semester.match(/^(winter|spring|summer|fall)\s+(\d{4})$/i);
+        if (!match) {
+            return null;
+        }
+        return Number(match[2]) * 4 + TERM_ORDER.indexOf(match[1].toLowerCase());
     }
 
     // filters look like { department: "Art", level: "all", ... }
