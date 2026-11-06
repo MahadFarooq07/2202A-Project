@@ -3,6 +3,7 @@ const errorMessage = document.getElementById("error-message");
 const courseList = document.getElementById("course-list");
 const courseDetails = document.getElementById("course-details");
 const sortSelect = document.getElementById("sort-select");
+const courseCount = document.getElementById("course-count");
 
 // each filter dropdown + the course field it reads
 const filterConfigs = [
@@ -50,10 +51,27 @@ function parseCourses(fileText) {
         throw new Error("No valid courses found in the file.");
     }
 
+    // same id twice? keep the first one
+    const seenIds = new Set();
+    const courses = validEntries
+        .map((entry) => new Course(entry))
+        .filter((course) => {
+            if (seenIds.has(course.id)) {
+                return false;
+            }
+            seenIds.add(course.id);
+            return true;
+        });
+
     return {
-        courses: validEntries.map((entry) => new Course(entry)),
-        skippedCount: parsedData.length - validEntries.length
+        courses,
+        skippedCount: parsedData.length - validEntries.length,
+        duplicateCount: validEntries.length - courses.length
     };
+}
+
+function pluralize(count, singular, plural = `${singular}s`) {
+    return `${count} ${count === 1 ? singular : plural}`;
 }
 
 function showPlaceholderDetails() {
@@ -158,6 +176,9 @@ function updateCourseList() {
     const filteredCourses = allCourses.filter((course) => course.matchesFilters(filters));
     const visibleCourses = sortCourses(filteredCourses, sortSelect.value);
     renderCourseList(visibleCourses);
+    courseCount.textContent = allCourses.length > 0
+        ? `Showing ${visibleCourses.length} of ${pluralize(allCourses.length, "course")}`
+        : "";
 
     if (allCourses.length > 0 && visibleCourses.length === 0) {
         const emptyItem = document.createElement("li");
@@ -167,26 +188,35 @@ function updateCourseList() {
     }
 }
 
+// fresh file = fresh filters, sort, and selection
+function loadCourses(courses) {
+    allCourses = courses;
+    selectedCourse = null;
+    sortSelect.value = "none";
+    showPlaceholderDetails();
+    populateAllFilters(allCourses);
+    updateCourseList();
+}
+
 function handleFileText(fileText) {
     try {
-        const { courses, skippedCount } = parseCourses(fileText);
-        allCourses = courses;
-        selectedCourse = null;
-        showPlaceholderDetails();
-        populateAllFilters(allCourses);
-        updateCourseList();
+        const { courses, skippedCount, duplicateCount } = parseCourses(fileText);
+        loadCourses(courses);
 
+        const notes = [];
         if (skippedCount > 0) {
-            showError(`Skipped ${skippedCount} invalid course entr${skippedCount === 1 ? "y" : "ies"}.`);
+            notes.push(`skipped ${pluralize(skippedCount, "invalid entry", "invalid entries")}`);
+        }
+        if (duplicateCount > 0) {
+            notes.push(`removed ${pluralize(duplicateCount, "duplicate id")}`);
+        }
+        if (notes.length > 0) {
+            showError(`Loaded with issues: ${notes.join(", ")}.`);
         } else {
             clearError();
         }
     } catch (loadError) {
-        allCourses = [];
-        selectedCourse = null;
-        showPlaceholderDetails();
-        populateAllFilters(allCourses);
-        updateCourseList();
+        loadCourses([]);
         showError(`Couldn't load courses: ${loadError.message}`);
     }
 }
@@ -206,6 +236,9 @@ function handleFileSelect(event) {
     reader.onload = () => handleFileText(reader.result);
     reader.onerror = () => showError("Couldn't read the file.");
     reader.readAsText(selectedFile);
+
+    // lets you pick the same file again and still trigger a reload
+    fileInput.value = "";
 }
 
 fileInput.addEventListener("change", handleFileSelect);

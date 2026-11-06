@@ -111,6 +111,16 @@ h2 {
     top: 16px;
 }
 
+.course-count {
+    margin: -4px 0 12px;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.course-count:empty {
+    display: none;
+}
+
 #course-list {
     list-style: none;
     margin: 0;
