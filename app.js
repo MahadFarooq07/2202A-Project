@@ -113,6 +113,27 @@ function populateAllFilters(courses) {
     filterConfigs.forEach((config) => populateFilter(config, courses));
 }
 
+function getActiveFilters() {
+    const filters = {};
+    filterConfigs.forEach((config) => {
+        filters[config.field] = config.select.value;
+    });
+    return filters;
+}
+
+function updateCourseList() {
+    const filters = getActiveFilters();
+    const visibleCourses = allCourses.filter((course) => course.matchesFilters(filters));
+    renderCourseList(visibleCourses);
+
+    if (allCourses.length > 0 && visibleCourses.length === 0) {
+        const emptyItem = document.createElement("li");
+        emptyItem.className = "placeholder-text";
+        emptyItem.textContent = "No courses match these filters.";
+        courseList.appendChild(emptyItem);
+    }
+}
+
 function handleFileText(fileText) {
     try {
         const { courses, skippedCount } = parseCourses(fileText);
@@ -120,7 +141,7 @@ function handleFileText(fileText) {
         selectedCourse = null;
         showPlaceholderDetails();
         populateAllFilters(allCourses);
-        renderCourseList(allCourses);
+        updateCourseList();
 
         if (skippedCount > 0) {
             showError(`Skipped ${skippedCount} invalid course entr${skippedCount === 1 ? "y" : "ies"}.`);
@@ -132,7 +153,7 @@ function handleFileText(fileText) {
         selectedCourse = null;
         showPlaceholderDetails();
         populateAllFilters(allCourses);
-        renderCourseList(allCourses);
+        updateCourseList();
         showError(`Couldn't load courses: ${loadError.message}`);
     }
 }
@@ -155,3 +176,4 @@ function handleFileSelect(event) {
 }
 
 fileInput.addEventListener("change", handleFileSelect);
+filterConfigs.forEach((config) => config.select.addEventListener("change", updateCourseList));

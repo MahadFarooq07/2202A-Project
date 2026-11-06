@@ -69,6 +69,13 @@ class Course {
         return value === null ? MISSING_TEXT : String(value);
     }
 
+    // filters look like { department: "Art", level: "all", ... }
+    matchesFilters(filters) {
+        return Object.entries(filters).every(([field, value]) =>
+            value === "all" || String(this[field]) === value
+        );
+    }
+
     getDisplayLabel() {
         return this._id;
     }
