@@ -72,7 +72,7 @@ class Course {
 
     // "Fall 2025" -> 2025 * 4 + 3, so later terms get bigger numbers
     getSemesterSortKey() {
-        const match = this._semester.match(/^(winter|spring|summer|fall)\s+(\d{4})$/i);
+        const match = this.semester.match(/^(winter|spring|summer|fall)\s+(\d{4})$/i);
         if (!match) {
             return null;
         }
@@ -87,17 +87,17 @@ class Course {
     }
 
     getDisplayLabel() {
-        return this._id;
+        return this.id;
     }
 
     getDetailFields() {
         return [
-            { label: "Title", value: this._title },
-            { label: "Department", value: this._department },
-            { label: "Level", value: Course.formatNumber(this._level) },
-            { label: "Credits", value: Course.formatNumber(this._credits) },
-            { label: "Instructor", value: this._instructor },
-            { label: "Semester", value: this._semester }
+            { label: "Title", value: this.title },
+            { label: "Department", value: this.department },
+            { label: "Level", value: Course.formatNumber(this.level) },
+            { label: "Credits", value: Course.formatNumber(this.credits) },
+            { label: "Instructor", value: this.instructor },
+            { label: "Semester", value: this.semester }
         ];
     }
 
@@ -105,7 +105,7 @@ class Course {
         const container = document.createElement("div");
 
         const heading = document.createElement("h3");
-        heading.textContent = this._id;
+        heading.textContent = this.id;
         container.appendChild(heading);
 
         this.getDetailFields().forEach((field) => {
@@ -119,7 +119,7 @@ class Course {
 
         const description = document.createElement("p");
         description.className = "course-description";
-        description.textContent = this._description;
+        description.textContent = this.description;
         container.appendChild(description);
 
         return container;

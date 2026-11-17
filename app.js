@@ -38,7 +38,7 @@ function parseCourses(fileText) {
     let parsedData;
     try {
         parsedData = JSON.parse(fileText);
-    } catch (parseError) {
+    } catch {
         throw new Error("The file isn't valid JSON.");
     }
 
@@ -142,9 +142,15 @@ function getActiveFilters() {
 
 // missing values always go last, no matter the direction
 function compareWithMissingLast(a, b, isMissing, compare, direction) {
-    if (isMissing(a) && isMissing(b)) return 0;
-    if (isMissing(a)) return 1;
-    if (isMissing(b)) return -1;
+    if (isMissing(a) && isMissing(b)) {
+        return 0;
+    }
+    if (isMissing(a)) {
+        return 1;
+    }
+    if (isMissing(b)) {
+        return -1;
+    }
     return compare(a, b) * direction;
 }
 
@@ -224,11 +230,6 @@ function handleFileText(fileText) {
 function handleFileSelect(event) {
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-        return;
-    }
-
-    if (!selectedFile.name.toLowerCase().endsWith(".json")) {
-        showError("Please pick a .json file.");
         return;
     }
 
